@@ -1,0 +1,58 @@
+package org.example;
+
+import java_cup.runtime.*;
+
+parser code {:
+
+    public Parser(Lexer lexer){
+    super(lexer);
+    }
+
+
+    public void syntax_error(Symbol s) {
+            String description = "No se esperaba el componente: " + (s.value) + ".";
+            System.out.println(description);
+    }
+    public void unrecovered_syntax_error(Symbol s) {
+            String description = "No se esperaba el componente: " + (s.value) + ".";
+            System.out.println(description);
+    }
+:};
+
+action code
+{:
+:}
+
+terminal COMA;
+terminal UNO, CERO;
+
+nonterminal inicio;
+nonterminal Reduccion b, c, d;
+
+
+start with inicio;
+
+inicio::= c
+;
+c::=  c:a COMA b:b {: System.out.print(b.getDecimal() + ","); :}
+    | b:a {: System.out.print(a.getDecimal() + ","); :}
+;
+b::=  d:a b:b   {:
+                Reduccion reduccion = new Reduccion();
+                reduccion.setExponente(b.getExponente() + 1);
+                int auxi = (int) (b.getDecimal() + (int) a.getValue() * Math.pow(2, b.getExponente()));
+                reduccion.setDecimal(auxi);
+                RESULT = reduccion;
+                :}
+    | d:a       {:
+                Reduccion reduccion = new Reduccion();
+                reduccion.setExponente(1);
+                reduccion.setDecimal(a.getValue());
+                RESULT = reduccion;
+                :}
+;
+
+//public Reduccion(int value, int exponente, int decimal) {
+d::=  UNO:a     {: RESULT = new Reduccion(Integer.parseInt(a.toString()),0,0); :}
+    | CERO:a    {: RESULT = new Reduccion(Integer.parseInt(a.toString()),0,0); :}
+;
